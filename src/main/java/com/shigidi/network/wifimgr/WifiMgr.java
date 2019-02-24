@@ -16,12 +16,10 @@ public class WifiMgr {
 
     private final FileInputStream serviceAccount;
     private final DatabaseReference database;
-    private  String mac;
 
     public WifiMgr(){
         this.serviceAccount = initializeServiceAccount();
         this.database = initializeFirebase();
-        this.mac = getMAC();
 
     }
 
@@ -72,27 +70,10 @@ public class WifiMgr {
     public String update(String hostname , FirebaseDataEntity dataToBeUpdated){
         DatabaseReference ref = database.child(hostname);
         ref.setValueAsync(dataToBeUpdated.toString());
+        System.out.println("Writing");
         return "";
     }
 
-    private static String getMAC(){
-        String mac_address = "Unknown";
-        try {
-            InetAddress ip = InetAddress.getLocalHost();
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            byte[] mac = network.getHardwareAddress();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-            }
-            mac_address = sb.toString();
-        } catch (UnknownHostException ex) {
-            ex.printStackTrace();
-        } catch (SocketException ex){
-            ex.printStackTrace();
-        }
-        return mac_address;
-    }
 
     public void begin(){
         while (true) {
@@ -101,7 +82,9 @@ public class WifiMgr {
                     InetAddress inetAddress = InetAddress.getLocalHost();
                     MachineInfo machineInfo = new MachineInfo();
                     machineInfo.ipAddress = inetAddress.getHostAddress();
-                    update(mac, new FirebaseDataEntity(machineInfo));
+                    String host = inetAddress.getHostName().replace(".","");
+                    update(host, new FirebaseDataEntity(machineInfo));
+                    System.out.println(host);
                     System.out.println("IP Address:- " + inetAddress.getHostAddress());
                     System.out.println("Host Name:- " + inetAddress.getHostName());
                 } catch (UnknownHostException ex) {
