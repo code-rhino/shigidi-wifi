@@ -87,9 +87,9 @@ public class WifiMgr {
             }
             mac_address = sb.toString();
         } catch (UnknownHostException ex) {
-
+            ex.printStackTrace();
         } catch (SocketException ex){
-
+            ex.printStackTrace();
         }
         return mac_address;
     }
