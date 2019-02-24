@@ -1,5 +1,6 @@
 package com.shigidi.network.wifimgr;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,13 +26,23 @@ public class WifiMgr {
     }
 
     private FileInputStream initializeServiceAccount() {
-        URL path = WifiMgr.class.getClassLoader().getResource("pi-car-ae948-firebase-adminsdk-2mzpv-373a4b9faf.json");
+
+        URL path = null;
+        try {
+            String homedir = System.getProperty("user.home");
+            System.out.println(homedir);
+            path = new File(homedir + "/pi-car-ae948-firebase-adminsdk-2mzpv-373a4b9faf.json").toURI().toURL();
+
+        } catch (MalformedURLException ex){
+            System.out.println("Bad url" + path.toString());
+        }
         try {
             return new FileInputStream(path.getPath());
         } catch (FileNotFoundException e) {
 
             throw new Error(e);
         }
+
     }
     private DatabaseReference initializeFirebase() {
         FirebaseOptions options;
@@ -121,6 +132,7 @@ public class WifiMgr {
 
     public static void main(String args[]){
         WifiMgr wifiMgr = new WifiMgr();
+        System.out.println( System.getProperty("user.home"));
         wifiMgr.begin();
     }
 }
