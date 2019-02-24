@@ -5,6 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -16,11 +20,13 @@ public class WifiMgr {
 
     private final FileInputStream serviceAccount;
     private final DatabaseReference database;
+    private String machineName = "";
 
     public WifiMgr(){
         this.serviceAccount = initializeServiceAccount();
         this.database = initializeFirebase();
-
+        String filePath = System.getProperty("user.home")+ "/identity.txt";
+        machineName = readLineByLineJava8( filePath );
     }
 
     private FileInputStream initializeServiceAccount() {
@@ -82,9 +88,8 @@ public class WifiMgr {
                     InetAddress inetAddress = InetAddress.getLocalHost();
                     MachineInfo machineInfo = new MachineInfo();
                     machineInfo.ipAddress = inetAddress.getHostAddress();
-                    String host = inetAddress.getHostName().replace(".","");
-                    update(host, new FirebaseDataEntity(machineInfo));
-                    System.out.println(host);
+                    update(machineName, new FirebaseDataEntity(machineInfo));
+                    System.out.println(machineName);
                     System.out.println("IP Address:- " + inetAddress.getHostAddress());
                     System.out.println("Host Name:- " + inetAddress.getHostName());
                 } catch (UnknownHostException ex) {
@@ -111,6 +116,22 @@ public class WifiMgr {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private static String readLineByLineJava8(String filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return contentBuilder.toString();
     }
 
     public static void main(String args[]){
