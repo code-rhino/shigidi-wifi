@@ -16,6 +16,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.sun.javafx.binding.StringFormatter;
 
 public class WifiMgr {
 
@@ -84,8 +85,10 @@ public class WifiMgr {
     }
 
 
-    public void wirelessIp(){
+    public String wirelessIp(){
         try {
+            StringBuilder sb = new StringBuilder();
+            String address = "";
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 
             while (interfaces.hasMoreElements()) {
@@ -98,23 +101,29 @@ public class WifiMgr {
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
+                    if(networkInterface.getDisplayName().equals("en0") || networkInterface.getDisplayName().equals("wlan0")) {
                     System.out.println(String.format("NetInterface: name [%s], ip [%s]",
                             networkInterface.getDisplayName(), addr.getHostAddress()));
+                    address = String.format("%s:%s ",networkInterface.getDisplayName(), addr.getHostAddress());
+                    }
                 }
+
             }
+            return address;
         }catch (SocketException ex){
 
         }
+        return "no connection";
     }
 
     public void begin(){
         while (true) {
             if (WifiMgr.netIsAvailable()) {
                 try {
-                    wirelessIp();
+                    System.out.println("Test "+wirelessIp());
                     InetAddress inetAddress = InetAddress.getLocalHost();
                     MachineInfo machineInfo = new MachineInfo();
-                    machineInfo.ipAddress = inetAddress.getHostAddress();
+                    machineInfo.ipAddress = wirelessIp();
                     String stuff = machineName;
                     update(stuff, new FirebaseDataEntity(machineInfo));
                     System.out.println(machineName);
