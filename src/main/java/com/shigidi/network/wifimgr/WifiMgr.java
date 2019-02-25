@@ -8,6 +8,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.stream.Stream;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -83,10 +84,34 @@ public class WifiMgr {
     }
 
 
+    public void wirelessIp(){
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                // drop inactive
+                if (!networkInterface.isUp())
+                    continue;
+
+                // smth we can explore
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    System.out.println(String.format("NetInterface: name [%s], ip [%s]",
+                            networkInterface.getDisplayName(), addr.getHostAddress()));
+                }
+            }
+        }catch (SocketException ex){
+
+        }
+    }
+
     public void begin(){
         while (true) {
             if (WifiMgr.netIsAvailable()) {
                 try {
+                    wirelessIp();
                     InetAddress inetAddress = InetAddress.getLocalHost();
                     MachineInfo machineInfo = new MachineInfo();
                     machineInfo.ipAddress = inetAddress.getHostAddress();
