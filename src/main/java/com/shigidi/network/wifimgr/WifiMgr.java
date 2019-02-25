@@ -20,13 +20,15 @@ public class WifiMgr {
 
     private final FileInputStream serviceAccount;
     private final DatabaseReference database;
-    private String machineName = "";
+    private String machineName;
 
     public WifiMgr(){
         this.serviceAccount = initializeServiceAccount();
         this.database = initializeFirebase();
         String filePath = System.getProperty("user.home")+ "/identity.txt";
         machineName = readLineByLineJava8( filePath );
+        machineName = machineName.replace("\n","");
+        System.out.println("the machine name " + machineName);
     }
 
     private FileInputStream initializeServiceAccount() {
@@ -88,7 +90,8 @@ public class WifiMgr {
                     InetAddress inetAddress = InetAddress.getLocalHost();
                     MachineInfo machineInfo = new MachineInfo();
                     machineInfo.ipAddress = inetAddress.getHostAddress();
-                    update(machineName, new FirebaseDataEntity(machineInfo));
+                    String stuff = machineName;
+                    update(stuff, new FirebaseDataEntity(machineInfo));
                     System.out.println(machineName);
                     System.out.println("IP Address:- " + inetAddress.getHostAddress());
                     System.out.println("Host Name:- " + inetAddress.getHostName());
